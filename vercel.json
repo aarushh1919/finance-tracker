@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "finance-tracker/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "backend/src/server.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/src/server.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "finance-tracker/$1",
+      "check": true
+    },
+    {
+      "src": "/(.*)",
+      "status": 200,
+      "dest": "finance-tracker/index.html"
+    }
+  ]
+}
