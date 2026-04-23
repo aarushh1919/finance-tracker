@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 
 interface Props {
   transactions: Transaction[];
-  onDelete: (id: number) => void;
+  onDelete: (id: string | number) => void;
 }
 
 export function TransactionList({ transactions, onDelete }: Props) {

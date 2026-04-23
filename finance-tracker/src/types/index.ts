@@ -1,11 +1,21 @@
+export type TransactionType = 'income' | 'expense';
+
 export interface Transaction {
   id: string | number;
   name: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: TransactionType;
   category: string;
   date: string;
   note?: string;
+}
+
+export interface CategoryMeta {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  bg: string;
 }
 
 export interface MonthlyData {

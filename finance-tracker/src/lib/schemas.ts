@@ -6,8 +6,8 @@ export const transactionSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(50, 'Name must be under 50 characters'),
   amount: z
-    .number({ invalid_type_error: 'Amount must be a number' })
-    .positive('Amount must be greater than 0')
+    .number()
+    .min(0.01, 'Amount must be at least 0.01')
     .max(10_000_000, 'Amount is too large'),
   type: z.enum(['income', 'expense']),
   category: z.enum([

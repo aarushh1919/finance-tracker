@@ -54,7 +54,7 @@ export function useTransactions() {
       const response = await api.getCategories();
       console.log('Categories API response:', response);
       // Backend returns { success: true, count: X, data: [...] }
-      const categoryData = response.data?.data || response.data || [];
+      const categoryData = response.data || [];
       if (response.success && categoryData) {
         setCategories(categoryData);
       }
@@ -69,7 +69,7 @@ export function useTransactions() {
       const response = await api.getAccounts();
       console.log('Accounts API response:', response);
       // Backend returns { success: true, count: X, data: [...] }
-      const accountData = response.data?.data || response.data || [];
+      const accountData = response.data || [];
       if (response.success && accountData) {
         setAccounts(accountData);
       }

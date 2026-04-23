@@ -23,7 +23,7 @@ export function SpendingChart({ monthly, breakdown }: Props) {
             <BarChart data={monthly} barGap={4}>
               <XAxis dataKey="label" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={v => '₹' + (v/1000) + 'k'} />
-              <Tooltip formatter={(v: number) => fmt(v)} />
+              <Tooltip formatter={(v: any) => fmt(Number(v))} />
               <Bar dataKey="income"  fill="#9FE1CB" radius={[3,3,0,0]} name="Income" />
               <Bar dataKey="expense" fill="#F5C4B3" radius={[3,3,0,0]} name="Expense" />
               <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -45,14 +45,14 @@ export function SpendingChart({ monthly, breakdown }: Props) {
                 nameKey="cat"
                 cx="50%" cy="50%"
                 outerRadius={65}
-                label={({ cat, pct }) => `${getCat(cat).icon} ${pct}%`}
+                label={({ payload }) => `${getCat(payload.cat).icon} ${payload.pct}%`}
                 labelLine={false}
               >
                 {breakdown.slice(0, 5).map((entry, i) => (
                   <Cell key={i} fill={getCat(entry.cat).color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v: number) => fmt(v)} />
+              <Tooltip formatter={(v: any) => fmt(Number(v))} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
