@@ -33,9 +33,13 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // Also check env FRONTEND_URL
+    // Also check env FRONTEND_URL or allow any vercel deployment
     const allowedOrigin = process.env.FRONTEND_URL;
-    if (allowedOrigin && origin === allowedOrigin) {
+    if (allowedOrigin && (origin === allowedOrigin || allowedOrigin === '*')) {
+      return callback(null, true);
+    }
+
+    if (origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
     
