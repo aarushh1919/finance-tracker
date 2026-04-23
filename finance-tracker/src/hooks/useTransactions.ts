@@ -16,13 +16,16 @@ export function useTransactions() {
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await api.getTransactions();
+
+      // Backend returns { success: true, data: [...] } or { success: true, data: { data: [...] } }
+      const transactionData = response.data?.data || response.data;
       
-      if (response.success && response.data?.data) {
+      if (response.success && Array.isArray(transactionData)) {
         // Transform API data to match frontend format
-        const transformed = response.data.data.map((t: any) => ({
+        const transformed = transactionData.map((t: any) => ({
           id: t._id,
           name: t.description,
           amount: t.amount,
@@ -33,7 +36,7 @@ export function useTransactions() {
         }));
         setTransactions(transformed);
       } else if (response.success) {
-        // Empty data, set empty array
+        // Empty or unexpected data format, set empty array
         setTransactions([]);
       } else {
         setError(response.message || 'Failed to fetch transactions');
@@ -86,18 +89,18 @@ export function useTransactions() {
   const addTransaction = useCallback(async (data: TransactionFormData) => {
     setLoading(true);
     setError(null);
-    
+
     console.log('Adding transaction:', data);
     console.log('Available categories:', categories);
     console.log('Available accounts:', accounts);
-    
+
     // Wait for categories to load
     if (categories.length === 0) {
       setError('Categories still loading. Please wait a moment and try again.');
       setLoading(false);
       return false;
     }
-    
+
     try {
       // Find category by matching frontend ID to backend name (case-insensitive)
       const categoryObj = categories.find(c => {
@@ -107,26 +110,26 @@ export function useTransactions() {
         console.log(`Checking: ${c.name} vs ${data.category} -> ${match}`);
         return match;
       });
-      
+
       // Use first account if none specified
       const accountObj = accounts[0];
-      
+
       if (!categoryObj) {
         console.error('Category not found:', data.category, 'Available:', categories.map(c => c.name));
         setError(`Category "${data.category}" not found. Available: ${categories.map(c => c.name).join(', ')}`);
         setLoading(false);
         return false;
       }
-      
+
       if (!accountObj) {
         setError('No account available. Please create an account first.');
         setLoading(false);
         return false;
       }
-      
+
       console.log('Found category:', categoryObj);
       console.log('Found account:', accountObj);
-      
+
       const response = await api.createTransaction({
         description: data.name,
         amount: data.amount,
@@ -136,7 +139,7 @@ export function useTransactions() {
         date: new Date(data.date).toISOString(),
         notes: data.note || '',
       });
-      
+
       if (response.success) {
         // Refresh the list
         await fetchTransactions();
@@ -151,16 +154,16 @@ export function useTransactions() {
     } finally {
       setLoading(false);
     }
-  }, [fetchTransactions]);
+  }, [fetchTransactions, categories, accounts]);
 
   // Delete transaction from API
   const deleteTransaction = useCallback(async (id: number | string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await api.deleteTransaction(String(id));
-      
+
       if (response.success) {
         await fetchTransactions();
         return true;
@@ -174,7 +177,7 @@ export function useTransactions() {
     } finally {
       setLoading(false);
     }
-  }, [fetchTransactions]);
+  }, [fetchTransactions, categories, accounts]);
 
   // Stats calculations
   const getMonthStats = useCallback(() => {
@@ -184,7 +187,7 @@ export function useTransactions() {
       const d = new Date(t.date);
       return d.getMonth() === cm && d.getFullYear() === cy;
     });
-    const income  = thisMonth.filter(t => t.type === 'income') .reduce((s, t) => s + t.amount, 0);
+    const income = thisMonth.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const expense = thisMonth.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     return { income, expense, balance: income - expense, count: thisMonth.length };
   }, [transactions]);
@@ -235,7 +238,7 @@ export function useTransactions() {
       const currentSavings = income - expense;
       if (currentSavings < targetSavings) {
         const diff = targetSavings - currentSavings;
-        insights.push({ type: 'warn', text: `If you cut ${fmt(Math.min(diff, top.amt/2))} from your top expense (${c.label}), you'll hit your 20% savings goal!` });
+        insights.push({ type: 'warn', text: `If you cut ${fmt(Math.min(diff, top.amt / 2))} from your top expense (${c.label}), you'll hit your 20% savings goal!` });
       } else {
         insights.push({ type: 'info', text: `${c.label} is your top expense at ${fmt(top.amt)} (${top.pct}%).` });
       }
